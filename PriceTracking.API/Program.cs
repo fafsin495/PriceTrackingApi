@@ -5,6 +5,8 @@ using PriceTracking.Core.UnitOfWorks;
 using PriceTracking.Repository;
 using PriceTracking.Repository.Repositories;
 using PriceTracking.Repository.UnitOfWorks;
+using PriceTracking.Service.Mapping;
+using PriceTracking.Service.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,8 +19,8 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped(typeof(IGenericRepository<>),typeof(GenericRepository<>));
-//builder.Services.AddScoped(typeof(IService<>), typeof(Service<>));
-
+builder.Services.AddScoped(typeof(IService<>), typeof(Service<>));
+builder.Services.AddAutoMapper(typeof(MapProfile));
 
 
 builder.Services.AddDbContext<AppDbContext>(x =>
