@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using PriceTracking.Core;
+using PriceTracking.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;

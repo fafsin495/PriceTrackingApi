@@ -25,7 +25,7 @@ namespace PriceTracking.Repository.Repositories
             return await _dbset.AnyAsync(expression);
         }
 
-        public IQueryable<T> GetAll(Expression<Func<T, bool>> expression)
+        public IQueryable<T> GetAll()
         {
             return _dbset.AsNoTracking().AsQueryable();
         }

@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PriceTracking.Core
+namespace PriceTracking.Core.DTOs
 {
-    public class Category:BaseEntity
+    public class BaseDto
     {
-        public string Name { get; set; }
+        public int Id { get; set; }
     }
 }
