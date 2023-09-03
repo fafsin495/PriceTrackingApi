@@ -12,9 +12,10 @@ namespace PriceTracking.API.Controllers
     public class ProductController : CustomBaseController
     {
         private readonly IMapper _mapper;
-        private readonly IService<Product> _productService;
+        private readonly IProductService _productService;
 
-        public ProductController(IMapper mapper, IService<Product> productService)
+
+        public ProductController(IMapper mapper, IProductService productService)
         {
             _mapper = mapper;
             _productService = productService;
@@ -34,6 +35,17 @@ namespace PriceTracking.API.Controllers
             return CreateActionResult(CustomResponseDto<ProductDto>.Succes(200, productDto));
         }
 
+        [HttpGet("[action]/{id}")]
+        public async Task<IActionResult> GetSelectedData(int id , DateTime startDate , DateTime endDate)
+        {
+            return CreateActionResult(await _productService.GetSelectedValues(id, startDate, endDate));
+        }
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetInflationDifference(int id, DateTime startDate, DateTime endDate)
+        {
+            return CreateActionResult(await _productService.GetInfluationDifference(id, startDate, endDate));
+        }
+        
 
     }
 }

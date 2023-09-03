@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using PriceTracking.Core.DTOs;
 using PriceTracking.Core.Repositories;
 using PriceTracking.Core.Services;
 using PriceTracking.Core.UnitOfWorks;
@@ -37,6 +38,7 @@ namespace PriceTracking.Service.Services
         {
             return await _repository.GetByIdAsync(id);
         }
+
 
         public IQueryable<T> Where(Expression<Func<T, bool>> expression)
         {

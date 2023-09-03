@@ -7,6 +7,8 @@ using PriceTracking.Repository.Repositories;
 using PriceTracking.Repository.UnitOfWorks;
 using PriceTracking.Service.Mapping;
 using PriceTracking.Service.Services;
+using System.Reflection;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,10 +24,16 @@ builder.Services.AddScoped(typeof(IGenericRepository<>),typeof(GenericRepository
 builder.Services.AddScoped(typeof(IService<>), typeof(Service<>));
 builder.Services.AddAutoMapper(typeof(MapProfile));
 
+builder.Services.AddScoped<IProductRespository, ProductRepository>();
+builder.Services.AddScoped<IProductService, ProductService>();
+
 
 builder.Services.AddDbContext<AppDbContext>(x =>
 {
-    x.UseNpgsql(builder.Configuration.GetConnectionString("ProductPriceDb"));
+    x.UseNpgsql(builder.Configuration.GetConnectionString("ProductPriceDb"), option =>
+    {
+        option.MigrationsAssembly(Assembly.GetAssembly(typeof(AppDbContext)).GetName().Name);
+    });
 });
 
 

@@ -17,6 +17,8 @@ namespace PriceTracking.Service.Mapping
             CreateMap<ProductFeature, ProductFeatureDto>().ReverseMap();
             CreateMap<Category, CategoryDto>().ReverseMap();
             CreateMap<ProductDto, Product>();
+            CreateMap<Product, InflationDto>();
+
 
         }
     }
