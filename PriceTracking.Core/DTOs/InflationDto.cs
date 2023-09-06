@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PriceTracking.Core.DTOs
 {
-    public class InflationDto
+    public class InflationDto:ProductBaseDto
     {
         public List<ProductDto> Products { get; set; }
         public decimal StartingPrice { get; set; }

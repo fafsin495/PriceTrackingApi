@@ -45,7 +45,17 @@ namespace PriceTracking.API.Controllers
         {
             return CreateActionResult(await _productService.GetInfluationDifference(id, startDate, endDate));
         }
-        
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetWeeklyDifference(int id, DateTime startDate, DateTime endDate)
+        {
+            return CreateActionResult(await _productService.GetWeeklyDifference(id, startDate, endDate));
+        }
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetMonthlyDifference(int id, DateTime startDate, DateTime endDate)
+        {
+            return CreateActionResult(await _productService.GetMonthlyDifference(id, startDate, endDate));
+        }
 
     }
 }

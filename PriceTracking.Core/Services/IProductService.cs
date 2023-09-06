@@ -14,5 +14,9 @@ namespace PriceTracking.Core.Services
         Task< CustomResponseDto<List<ProductDto>>> GetSelectedValues(int id, DateTime startDate, DateTime endDate);
         Task<CustomResponseDto<InflationDto>> GetInfluationDifference(int id, DateTime startDate, DateTime endDate);
 
+        Task<CustomResponseDto<InflationDto>> GetWeeklyDifference(int id, DateTime startDate, DateTime endDate);
+
+        Task<CustomResponseDto<InflationDto>> GetMonthlyDifference(int id, DateTime startDate, DateTime endDate);
+
     }
 }
