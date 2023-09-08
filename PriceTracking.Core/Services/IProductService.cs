@@ -11,12 +11,12 @@ namespace PriceTracking.Core.Services
 {
     public interface IProductService:IService<Product>
     {
-        Task< CustomResponseDto<List<ProductDto>>> GetSelectedValues(int id, DateTime startDate, DateTime endDate);
-        Task<CustomResponseDto<InflationDto>> GetInfluationDifference(int id, DateTime startDate, DateTime endDate);
+        Task< CustomResponseDto<List<ProductDto>>> GetSelectedValues(int id, DateTime fromDate, DateTime toDate);
+        Task<CustomResponseDto<InflationDto>> GetInfluationDifference(int id, DateTime fromDate, DateTime toDate);
 
-        Task<CustomResponseDto<InflationDto>> GetWeeklyDifference(int id, DateTime startDate, DateTime endDate);
+        Task<CustomResponseDto<InflationDto>> GetWeeklyDifference(int id, DateTime fromDate, DateTime toDate);
 
-        Task<CustomResponseDto<InflationDto>> GetMonthlyDifference(int id, DateTime startDate, DateTime endDate);
-
+        Task<CustomResponseDto<InflationDto>> GetMonthlyDifference(int id, DateTime fromDate, DateTime toDate);
+        Task<CustomResponseDto<List<InflationDto>>> GetTotalInflation();
     }
 }

@@ -16,9 +16,9 @@ namespace PriceTracking.Repository.Repositories
         {
         }
 
-        public async Task<List<Product>> GetSelectedValues(int id, DateTime startDate, DateTime endDate)
+        public async Task<List<Product>> GetSelectedValues(int id, DateTime fromDate, DateTime toDate)
         {
-            return  await _context.Products.Where(x => x.ProductId == id.ToString()).Where(x => x.ProductDate >= startDate && x.ProductDate <= endDate).OrderBy(x => x.ProductDate).ToListAsync();
+            return  await _context.Products.Where(x => x.ProductId == id.ToString()).Where(x => x.ProductDate >= fromDate && x.ProductDate <= toDate).OrderBy(x => x.ProductDate).ToListAsync();
         }
     }
 }
