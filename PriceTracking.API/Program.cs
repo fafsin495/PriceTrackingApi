@@ -1,4 +1,8 @@
+using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using PriceTracking.API.Filters;
 using PriceTracking.Core.Repositories;
 using PriceTracking.Core.Services;
 using PriceTracking.Core.UnitOfWorks;
@@ -7,6 +11,7 @@ using PriceTracking.Repository.Repositories;
 using PriceTracking.Repository.UnitOfWorks;
 using PriceTracking.Service.Mapping;
 using PriceTracking.Service.Services;
+using PriceTracking.Service.Validations;
 using System.Reflection;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
@@ -14,7 +19,14 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(options=> options.Filters.Add(new ValidateFilterAttribute()))
+    .AddFluentValidation(x=>x.RegisterValidatorsFromAssemblyContaining<ProductDtoValidator>());
+
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.SuppressModelStateInvalidFilter = true;
+});
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

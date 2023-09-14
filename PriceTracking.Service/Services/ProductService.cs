@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using PriceTracking.Core.DTOs;
+using PriceTracking.Core.DTOs.RequestDtos;
 using PriceTracking.Core.DTOs.ResponseDtos;
 using PriceTracking.Core.Models;
 using PriceTracking.Core.Repositories;
@@ -67,13 +68,13 @@ namespace PriceTracking.Service.Services
         /// <param name="toDate">Son tarih</param>
         /// <param name="id">Son tarih</param>
         /// <returns>Aylık olarak Fiyat farkı</returns>
-        public async Task<CustomResponseDto<InflationDto>> GetMonthlyDifference(int id, DateTime fromDate, DateTime toDate)
+        public async Task<CustomResponseDto<InflationDto>> GetMonthlyDifference(RequestDto request)
         {
-            fromDate = fromDate.ToUniversalTime().AddDays(1);
-            toDate = toDate.ToUniversalTime().AddDays(1);
+            var fromDate = request.FromDate.ToUniversalTime().AddDays(1);
+            var toDate = request.ToDate.ToUniversalTime().AddDays(1);
 
             var monthDate = FindMonth(fromDate, toDate);
-            var products = await _productRespository.GetSelectedValues(id, fromDate, toDate);
+            var products = await _productRespository.GetSelectedValues(request.ProductId, fromDate, toDate);
             var specificProducts = GetSpecificValues(products, monthDate);
 
 
@@ -111,13 +112,13 @@ namespace PriceTracking.Service.Services
         /// <param name="toDate">Son tarih</param>
         /// <param name="id">Son tarih</param>
         /// <returns>Haftalık olarak Fiyat farkı</returns>
-        public async Task<CustomResponseDto<InflationDto>> GetWeeklyDifference (int id, DateTime fromDate, DateTime toDate)
+        public async Task<CustomResponseDto<InflationDto>> GetWeeklyDifference (RequestDto request)
         {
-            fromDate = fromDate.ToUniversalTime().AddDays(1);
-            toDate = toDate.ToUniversalTime().AddDays(1);
+            var fromDate = request.FromDate.ToUniversalTime().AddDays(1);
+            var toDate = request.ToDate.ToUniversalTime().AddDays(1);
             
             var weekDate = FindWeek(fromDate, toDate);
-            var products = await _productRespository.GetSelectedValues(id, fromDate, toDate);
+            var products = await _productRespository.GetSelectedValues(request.ProductId, fromDate, toDate);
             var specificProducts = GetSpecificValues(products, weekDate);
 
             var lastPrice = specificProducts.OrderBy(x => x.ProductDate).Select(x => x.ProductPrice).LastOrDefault();
@@ -154,10 +155,11 @@ namespace PriceTracking.Service.Services
         /// <param name="toDate">Son tarih</param>
         /// <param name="id">Son tarih</param>
         /// <returns>Fiyat farkı</returns>
-        public async Task<CustomResponseDto<InflationDto>> GetInfluationDifference(int id, DateTime fromDate, DateTime toDate)
+        public async Task<CustomResponseDto<InflationDto>> GetInfluationDifference(RequestDto request)
         {
-            fromDate = fromDate.ToUniversalTime().AddDays(1);
-            toDate = toDate.ToUniversalTime().AddDays(1);
+            var fromDate = request.FromDate.ToUniversalTime().AddDays(1);
+            var toDate = request.ToDate.ToUniversalTime().AddDays(1);
+            var id = request.ProductId;
 
             var prices = await _productRespository.Where(x => x.ProductId == id.ToString()).Where(y => y.ProductDate >= fromDate && y.ProductDate <= toDate).OrderBy(x=>x.ProductDate).Select(p => p.ProductPrice).ToListAsync();
             var product = await _productRespository.GetSelectedValues(id, fromDate, toDate);
@@ -195,12 +197,12 @@ namespace PriceTracking.Service.Services
         /// <param name="toDate">Son tarih</param>
         /// <param name="id">Son tarih</param>
         /// <returns>Ürünler</returns>
-        public async Task<CustomResponseDto<List<ProductDto>>> GetSelectedValues(int id, DateTime fromDate, DateTime toDate)
+        public async Task<CustomResponseDto<List<ProductDto>>> GetSelectedValues(RequestDto request)
         {
-            fromDate = fromDate.ToUniversalTime().AddDays(1);
-            toDate = toDate.ToUniversalTime().AddDays(1);
+            var fromDate = request.FromDate.ToUniversalTime().AddDays(1);
+            var toDate = request.ToDate.ToUniversalTime().AddDays(1);
 
-            var product = await _productRespository.GetSelectedValues(id, fromDate, toDate);
+            var product = await _productRespository.GetSelectedValues(request.ProductId, fromDate, toDate);
             var productDto = _mapper.Map<List<ProductDto>>(product);
 
             return CustomResponseDto<List<ProductDto>>.Succes(200, productDto);

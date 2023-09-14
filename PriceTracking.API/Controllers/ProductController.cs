@@ -1,14 +1,14 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using PriceTracking.Core.DTOs;
-using PriceTracking.Core.DTOs.ResponseDtos;
-using PriceTracking.Core.Models;
+using PriceTracking.API.Filters;
+using PriceTracking.Core.DTOs.RequestDtos;
 using PriceTracking.Core.Services;
 
 namespace PriceTracking.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [ValidateFilterAttribute]
     public class ProductController : CustomBaseController
     {
         private readonly IMapper _mapper;
@@ -21,34 +21,28 @@ namespace PriceTracking.API.Controllers
             _productService = productService;
         }
         
+
+
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<IActionResult> GetSelectedData([FromQuery]  RequestDto request)
         {
-            var product = await _productService.GetByIdAsync(id);
-            var productDto = _mapper.Map<ProductDto>(product);
-            return CreateActionResult(CustomResponseDto<ProductDto>.Succes(200, productDto));
+            return CreateActionResult(await _productService.GetSelectedValues(request));
+        }
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetInflationDifference([FromQuery] RequestDto request)
+        {
+            return CreateActionResult(await _productService.GetInfluationDifference(request));
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetSelectedData(int id , DateTime fromDate , DateTime toDate)
+        public async Task<IActionResult> GetWeeklyDifference([FromQuery] RequestDto request)
         {
-            return CreateActionResult(await _productService.GetSelectedValues(id, fromDate, toDate));
+            return CreateActionResult(await _productService.GetWeeklyDifference(request));
         }
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetInflationDifference(int id, DateTime fromDate, DateTime toDate)
+        public async Task<IActionResult> GetMonthlyDifference([FromQuery] RequestDto request)
         {
-            return CreateActionResult(await _productService.GetInfluationDifference(id, fromDate, toDate));
-        }
-
-        [HttpGet("[action]")]
-        public async Task<IActionResult> GetWeeklyDifference(int id, DateTime fromDate, DateTime toDate)
-        {
-            return CreateActionResult(await _productService.GetWeeklyDifference(id, fromDate, toDate));
-        }
-        [HttpGet("[action]")]
-        public async Task<IActionResult> GetMonthlyDifference(int id, DateTime fromDate, DateTime toDate)
-        {
-            return CreateActionResult(await _productService.GetMonthlyDifference(id, fromDate, toDate));
+            return CreateActionResult(await _productService.GetMonthlyDifference(request));
         }
         [HttpGet("[action]")]
         public async Task<IActionResult> GetTotalInflation()
