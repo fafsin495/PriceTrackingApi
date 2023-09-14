@@ -1,7 +1,6 @@
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using PriceTracking.API.Filters;
 using PriceTracking.Core.Repositories;
 using PriceTracking.Core.Services;
@@ -13,7 +12,6 @@ using PriceTracking.Service.Mapping;
 using PriceTracking.Service.Services;
 using PriceTracking.Service.Validations;
 using System.Reflection;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 var builder = WebApplication.CreateBuilder(args);
 

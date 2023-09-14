@@ -2,11 +2,6 @@
 using PriceTracking.Core.DTOs.RequestDtos;
 using PriceTracking.Core.DTOs.ResponseDtos;
 using PriceTracking.Core.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PriceTracking.Core.Services
 {

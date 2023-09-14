@@ -7,7 +7,6 @@ using PriceTracking.Core.Models;
 using PriceTracking.Core.Repositories;
 using PriceTracking.Core.Services;
 using PriceTracking.Core.UnitOfWorks;
-using PriceTracking.Repository.Repositories;
 using System.Globalization;
 
 namespace PriceTracking.Service.Services
