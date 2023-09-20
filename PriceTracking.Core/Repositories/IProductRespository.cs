@@ -10,6 +10,7 @@ namespace PriceTracking.Core.Repositories
 {
     public interface IProductRespository:IGenericRepository<Product>
     {
-        Task<List<Product>> GetSelectedValues(int id, DateTime fromDate, DateTime toDate);
+        Task<List<Product>> GetSelectedValuesByProductId(int id, DateTime fromDate, DateTime toDate);
+        Task<List<Product>> GetSelectedValuesByProductIds(List<string> id, DateTime fromDate, DateTime toDate);
     }
 }

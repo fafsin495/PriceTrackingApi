@@ -8,18 +8,34 @@ using PriceTracking.Core.Repositories;
 using PriceTracking.Core.Services;
 using PriceTracking.Core.UnitOfWorks;
 using System.Globalization;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace PriceTracking.Service.Services
 {
-    public class ProductService : Service<Product>, IProductService
+    public class ProductsService : Service<Product>, IProductsService
     {
         private readonly IProductRespository _productRespository;
         private readonly IMapper _mapper;
         private readonly object _lock = new object();
-        public ProductService(IGenericRepository<Product> repository, IUnitOfWork unitofWork, IMapper mapper, IProductRespository productRespository) : base(repository, unitofWork)
+        public ProductsService(IGenericRepository<Product> repository, IUnitOfWork unitofWork, IMapper mapper, IProductRespository productRespository) : base(repository, unitofWork)
         {
             _mapper = mapper;
             _productRespository = productRespository;
+        }
+
+
+        public async Task<CustomResponseDto<List<ProductDto>>> GetProductsByDatesAndIds(RequestByProductIdsDto request)
+        {
+            var idList = new List<string>();
+            request.ProductIds.ForEach(x => { idList.Add(x.ToString()); });
+
+            var fromDate = request.FromDate.ToUniversalTime().AddDays(1);
+            var toDate = request.ToDate.ToUniversalTime().AddDays(1);
+
+            var products = await _productRespository.Where(product => product.ProductDate >= fromDate && product.ProductDate <= toDate).Where(x => idList.Contains(x.ProductId)).OrderBy(date=>date.ProductDate).ToListAsync();
+            var productDto = _mapper.Map<List<ProductDto>>(products);
+
+            return CustomResponseDto<List<ProductDto>>.Succes(200, productDto);
         }
 
         /// <summary>
@@ -46,7 +62,7 @@ namespace PriceTracking.Service.Services
                 EndingPrice = lastProducts.Where(x => x.ProductDate == lastDate && x.ProductId == x.ProductId).Select(x => x.ProductPrice).FirstOrDefault(),
             }).ToList();
 
-            inflationDtos.ForEach(x => x.InflationPercentageDifference = (x.EndingPrice - x.StartingPrice) / x.StartingPrice* 100);
+            inflationDtos.ForEach(x => x.InflationPercentageDifference = (x.EndingPrice - x.StartingPrice) / x.StartingPrice * 100);
             inflationDtos.ForEach(x => x.InflationDifference = x.EndingPrice - x.StartingPrice);
             var productDto = _mapper.Map<List<InflationDto>>(inflationDtos);
 
@@ -67,34 +83,45 @@ namespace PriceTracking.Service.Services
         /// <param name="toDate">Son tarih</param>
         /// <param name="id">Son tarih</param>
         /// <returns>Aylık olarak Fiyat farkı</returns>
-        public async Task<CustomResponseDto<InflationDto>> GetMonthlyDifference(RequestByProductIdDto request)
+        public async Task<CustomResponseDto<List<InflationDto>>> GetMonthlyDifference(RequestByProductIdsDto request)
         {
+            var idList = new List<string>();
+            request.ProductIds.ForEach(x => { idList.Add(x.ToString()); });
+
             var fromDate = request.FromDate.ToUniversalTime().AddDays(1);
             var toDate = request.ToDate.ToUniversalTime().AddDays(1);
 
             var monthDate = FindMonth(fromDate, toDate);
-            var products = await _productRespository.GetSelectedValuesByProductId(request.ProductId, fromDate, toDate);
-            var specificProducts = GetSpecificValues(products, monthDate);
+
+            List<InflationDto> allResult = new List<InflationDto>();
+            foreach (var id in idList) 
+            {
+                var products = await _productRespository.GetSelectedValuesByProductId(Convert.ToInt32(id), fromDate, toDate);
+                var specificProducts = GetSpecificValues(products, monthDate);
 
 
-            var lastPrice = specificProducts.OrderBy(x => x.ProductDate).Select(x => x.ProductPrice).LastOrDefault();
-            var firstPrice = specificProducts.OrderBy(x => x.ProductDate).Select(x => x.ProductPrice).FirstOrDefault();
+                var lastPrice = specificProducts.OrderBy(x => x.ProductDate).Select(x => x.ProductPrice).LastOrDefault();
+                var firstPrice = specificProducts.OrderBy(x => x.ProductDate).Select(x => x.ProductPrice).FirstOrDefault();
+
+                 
+                InflationDto deneme = new InflationDto();
+                deneme.ProductId = specificProducts.FirstOrDefault().ProductId;
+                deneme.ProductTitle = specificProducts.FirstOrDefault().ProductTitle;
+                deneme.ProductCategory = specificProducts.FirstOrDefault().ProductCategory;
+                deneme.InflationDifference = lastPrice - firstPrice;
+                deneme.InflationPercentageDifference = Math.Round(((lastPrice - firstPrice) / firstPrice) * 100, 2);
+                deneme.DurationDate = (toDate - fromDate).Days;
+                deneme.StartingPrice = firstPrice;
+                deneme.EndingPrice = lastPrice;
+                deneme.Products = _mapper.Map<List<ProductDto>>(specificProducts);
+
+                allResult.Add(deneme);
+
+            }
 
 
-            InflationDto deneme = new InflationDto();
-            deneme.ProductId = specificProducts.FirstOrDefault().ProductId;
-            deneme.ProductTitle= specificProducts.FirstOrDefault().ProductTitle;
-            deneme.ProductCategory = specificProducts.FirstOrDefault().ProductCategory;
-            deneme.InflationDifference = lastPrice - firstPrice;
-            deneme.InflationPercentageDifference = Math.Round(((lastPrice - firstPrice) / firstPrice) * 100, 2);
-            deneme.DurationDate = (toDate - fromDate).Days;
-            deneme.StartingPrice = firstPrice;
-            deneme.EndingPrice = lastPrice;
-            deneme.Products = _mapper.Map<List<ProductDto>>(specificProducts);
-
-
-            var productDto = _mapper.Map<InflationDto>(deneme);
-            return CustomResponseDto<InflationDto>.Succes(200, productDto);
+            var productDto = _mapper.Map<List<InflationDto>>(allResult);
+            return CustomResponseDto<List<InflationDto>>.Succes(200, productDto);
         }
         /// <summary>
         /// Bu metot, kullanıcı tarafından girilen iki farklı tarih arasındaki ürünlerin fiyatlarının haftalık olarak farkını hesaplar.
@@ -111,33 +138,41 @@ namespace PriceTracking.Service.Services
         /// <param name="toDate">Son tarih</param>
         /// <param name="id">Son tarih</param>
         /// <returns>Haftalık olarak Fiyat farkı</returns>
-        public async Task<CustomResponseDto<InflationDto>> GetWeeklyDifference (RequestByProductIdDto request)
+        public async Task<CustomResponseDto<List<InflationDto>>> GetWeeklyDifference(RequestByProductIdsDto request)
         {
+            var idList = new List<string>();
+            request.ProductIds.ForEach(x => { idList.Add(x.ToString()); });
+
             var fromDate = request.FromDate.ToUniversalTime().AddDays(1);
             var toDate = request.ToDate.ToUniversalTime().AddDays(1);
-            
             var weekDate = FindWeek(fromDate, toDate);
-            var products = await _productRespository.GetSelectedValuesByProductId(request.ProductId, fromDate, toDate);
-            var specificProducts = GetSpecificValues(products, weekDate).ToList();
-            specificProducts.OrderBy(x => x.ProductDate);
-            var lastPrice = specificProducts.Select(x => x.ProductPrice).LastOrDefault();
-            var firstPrice = specificProducts.Select(x => x.ProductPrice).FirstOrDefault();
+
+            List<InflationDto> allResult = new List<InflationDto>();
+            foreach (var id in idList)
+            {
+                var products = await _productRespository.GetSelectedValuesByProductId(Convert.ToInt32(id), fromDate, toDate);
+                var specificProducts = GetSpecificValues(products, weekDate).ToList();
+                specificProducts.OrderBy(x => x.ProductDate);
+                var lastPrice = specificProducts.Select(x => x.ProductPrice).LastOrDefault();
+                var firstPrice = specificProducts.Select(x => x.ProductPrice).FirstOrDefault();
 
 
-            InflationDto deneme = new InflationDto();
-            deneme.ProductId = specificProducts.FirstOrDefault().ProductId;
-            deneme.ProductTitle = specificProducts.FirstOrDefault().ProductTitle;
-            deneme.ProductCategory = specificProducts.FirstOrDefault().ProductCategory;
-            deneme.InflationDifference = lastPrice - firstPrice;
-            deneme.InflationPercentageDifference = Math.Round(((lastPrice - firstPrice) / firstPrice) * 100, 2);
-            deneme.DurationDate = (toDate - fromDate).Days;
-            deneme.StartingPrice = firstPrice;
-            deneme.EndingPrice = lastPrice;
-            deneme.Products = _mapper.Map<List<ProductDto>>(specificProducts);
+                InflationDto deneme = new InflationDto();
+                deneme.ProductId = specificProducts.FirstOrDefault().ProductId;
+                deneme.ProductTitle = specificProducts.FirstOrDefault().ProductTitle;
+                deneme.ProductCategory = specificProducts.FirstOrDefault().ProductCategory;
+                deneme.InflationDifference = lastPrice - firstPrice;
+                deneme.InflationPercentageDifference = Math.Round(((lastPrice - firstPrice) / firstPrice) * 100, 2);
+                deneme.DurationDate = (toDate - fromDate).Days;
+                deneme.StartingPrice = firstPrice;
+                deneme.EndingPrice = lastPrice;
+                deneme.Products = _mapper.Map<List<ProductDto>>(specificProducts);
 
+                allResult.Add(deneme);
+            }
 
-            var productDto = _mapper.Map<InflationDto>(deneme);
-            return CustomResponseDto<InflationDto>.Succes(200, productDto);
+            var productDto = _mapper.Map<List<InflationDto>>(allResult);
+            return CustomResponseDto<List<InflationDto>>.Succes(200, productDto);
         }
         /// <summary>
         /// Bu metot, kullanıcı tarafından girilen iki farklı tarih arasındaki ürünlerin fiyatların farkını hesaplar.
@@ -154,31 +189,38 @@ namespace PriceTracking.Service.Services
         /// <param name="toDate">Son tarih</param>
         /// <param name="id">Son tarih</param>
         /// <returns>Fiyat farkı</returns>
-        public async Task<CustomResponseDto<InflationDto>> GetInfluationDifference(RequestByProductIdDto request)
+        public async Task<CustomResponseDto<List<InflationDto>>> GetInfluationDifference(RequestByProductIdsDto request)
         {
+            var idList = new List<string>();
+            request.ProductIds.ForEach(x => { idList.Add(x.ToString()); });
+
             var fromDate = request.FromDate.ToUniversalTime().AddDays(1);
             var toDate = request.ToDate.ToUniversalTime().AddDays(1);
-            var id = request.ProductId;
+            List<InflationDto> allResult = new List<InflationDto>();
 
-            var prices = await _productRespository.Where(x => x.ProductId == id.ToString()).Where(y => y.ProductDate >= fromDate && y.ProductDate <= toDate).OrderBy(x=>x.ProductDate).Select(p => p.ProductPrice).ToListAsync();
-            var product = await _productRespository.GetSelectedValuesByProductId(id, fromDate, toDate);
+            foreach (var id in idList)
+            {
+                var prices = await _productRespository.Where(x => x.ProductId == id).Where(y => y.ProductDate >= fromDate && y.ProductDate <= toDate).OrderBy(x => x.ProductDate).Select(p => p.ProductPrice).ToListAsync();
+                var product = await _productRespository.GetSelectedValuesByProductId(Convert.ToInt32(id), fromDate, toDate);
 
-            var lastPrice = prices.LastOrDefault();
-            var firstPrice = prices.FirstOrDefault();
+                var lastPrice = prices.LastOrDefault();
+                var firstPrice = prices.FirstOrDefault();
 
-            var inflationPercentage = new InflationDto();
-            inflationPercentage.InflationDifference = lastPrice - firstPrice;
-            inflationPercentage.InflationPercentageDifference = Math.Round(((lastPrice - firstPrice) / firstPrice) * 100 , 2);
-            inflationPercentage.DurationDate = (toDate - fromDate).Days;
-            inflationPercentage.StartingPrice = firstPrice;
-            inflationPercentage.EndingPrice = lastPrice;
-            inflationPercentage.Products = _mapper.Map<List<ProductDto>>(product);
-            inflationPercentage.ProductId = product.FirstOrDefault().ProductId;
-            inflationPercentage.ProductTitle = product.FirstOrDefault().ProductTitle;
-            inflationPercentage.ProductCategory = product.FirstOrDefault().ProductCategory;
+                var inflationPercentage = new InflationDto();
+                inflationPercentage.InflationDifference = lastPrice - firstPrice;
+                inflationPercentage.InflationPercentageDifference = Math.Round(((lastPrice - firstPrice) / firstPrice) * 100, 2);
+                inflationPercentage.DurationDate = (toDate - fromDate).Days;
+                inflationPercentage.StartingPrice = firstPrice;
+                inflationPercentage.EndingPrice = lastPrice;
+                inflationPercentage.Products = _mapper.Map<List<ProductDto>>(product);
+                inflationPercentage.ProductId = product.FirstOrDefault().ProductId;
+                inflationPercentage.ProductTitle = product.FirstOrDefault().ProductTitle;
 
-            var productDto = _mapper.Map<InflationDto>(inflationPercentage);
-            return  CustomResponseDto<InflationDto>.Succes(200, productDto);
+                allResult.Add(inflationPercentage);
+            }
+
+            var productDto = _mapper.Map<List<InflationDto>>(allResult);
+            return CustomResponseDto<List<InflationDto>>.Succes(200, productDto);
 
         }
         /// <summary>
@@ -196,17 +238,21 @@ namespace PriceTracking.Service.Services
         /// <param name="toDate">Son tarih</param>
         /// <param name="id">Son tarih</param>
         /// <returns>Ürünler</returns>
-        public async Task<CustomResponseDto<List<ProductDto>>> GetSelectedValues(RequestByProductIdDto request)
+        public async Task<CustomResponseDto<List<ProductDto>>> GetSelectedValues(RequestByProductIdsDto request)
         {
+            var idList = new List<string>();
+            request.ProductIds.ForEach(x => { idList.Add(x.ToString()); });
+
             var fromDate = request.FromDate.ToUniversalTime().AddDays(1);
             var toDate = request.ToDate.ToUniversalTime().AddDays(1);
 
-            var product = await _productRespository.GetSelectedValuesByProductId(request.ProductId, fromDate, toDate);
+            var product = await _productRespository.GetSelectedValuesByProductIds(idList, fromDate, toDate);
             var productDto = _mapper.Map<List<ProductDto>>(product);
 
             return CustomResponseDto<List<ProductDto>>.Succes(200, productDto);
 
         }
+
 
         public List<Product> GetSpecificValues(List<Product> products , List<DateTime> dates)
         {

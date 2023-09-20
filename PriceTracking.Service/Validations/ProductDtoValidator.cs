@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace PriceTracking.Service.Validations
 {
-    public class ProductDtoValidator : AbstractValidator<RequestDto>
+    public class ProductDtoValidator : AbstractValidator<RequestByProductIdDto>
     {
         public ProductDtoValidator()
         {

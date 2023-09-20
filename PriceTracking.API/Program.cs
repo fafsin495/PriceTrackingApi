@@ -36,6 +36,7 @@ builder.Services.AddAutoMapper(typeof(MapProfile));
 
 builder.Services.AddScoped<IProductRespository, ProductRepository>();
 builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IProductsService, ProductsService>();
 
 
 builder.Services.AddDbContext<AppDbContext>(x =>

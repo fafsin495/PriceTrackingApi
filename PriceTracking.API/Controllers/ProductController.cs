@@ -24,23 +24,23 @@ namespace PriceTracking.API.Controllers
 
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetSelectedData([FromQuery]  RequestDto request)
+        public async Task<IActionResult> GetSelectedData([FromQuery] RequestByProductIdDto request)
         {
             return CreateActionResult(await _productService.GetSelectedValues(request));
         }
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetInflationDifference([FromQuery] RequestDto request)
+        public async Task<IActionResult> GetInflationDifference([FromQuery] RequestByProductIdDto request)
         {
             return CreateActionResult(await _productService.GetInfluationDifference(request));
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetWeeklyDifference([FromQuery] RequestDto request)
+        public async Task<IActionResult> GetWeeklyDifference([FromQuery] RequestByProductIdDto request)
         {
             return CreateActionResult(await _productService.GetWeeklyDifference(request));
         }
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetMonthlyDifference([FromQuery] RequestDto request)
+        public async Task<IActionResult> GetMonthlyDifference([FromQuery] RequestByProductIdDto request)
         {
             return CreateActionResult(await _productService.GetMonthlyDifference(request));
         }
@@ -49,6 +49,5 @@ namespace PriceTracking.API.Controllers
         {
             return CreateActionResult(await _productService.GetTotalInflation());
         }
-        
     }
 }

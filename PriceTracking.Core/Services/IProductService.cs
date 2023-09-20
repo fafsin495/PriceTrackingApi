@@ -7,12 +7,12 @@ namespace PriceTracking.Core.Services
 {
     public interface IProductService:IService<Product>
     {
-        Task< CustomResponseDto<List<ProductDto>>> GetSelectedValues(RequestDto request);
-        Task<CustomResponseDto<InflationDto>> GetInfluationDifference(RequestDto request);
+        Task< CustomResponseDto<List<ProductDto>>> GetSelectedValues(RequestByProductIdDto request);
+        Task<CustomResponseDto<InflationDto>> GetInfluationDifference(RequestByProductIdDto request);
 
-        Task<CustomResponseDto<InflationDto>> GetWeeklyDifference(RequestDto request);
+        Task<CustomResponseDto<InflationDto>> GetWeeklyDifference(RequestByProductIdDto request);
 
-        Task<CustomResponseDto<InflationDto>> GetMonthlyDifference(RequestDto request);
+        Task<CustomResponseDto<InflationDto>> GetMonthlyDifference(RequestByProductIdDto request);
         Task<CustomResponseDto<List<InflationDto>>> GetTotalInflation();
     }
 }

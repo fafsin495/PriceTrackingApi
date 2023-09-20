@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace PriceTracking.Core.DTOs.RequestDtos
 {
-    public class RequestDto
+    public class BaseRequestDto
     {
-        public int ProductId { get; set; }
         public DateTime FromDate { get; set; }
         public DateTime ToDate { get; set; }
 
