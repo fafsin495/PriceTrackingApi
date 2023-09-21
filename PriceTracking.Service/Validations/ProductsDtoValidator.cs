@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using PriceTracking.Core.DTOs.RequestDtos;
+using PriceTracking.Service.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;

@@ -7,6 +7,7 @@ using PriceTracking.Core.Models;
 using PriceTracking.Core.Repositories;
 using PriceTracking.Core.Services;
 using PriceTracking.Core.UnitOfWorks;
+using PriceTracking.Service.Exceptions;
 using System.Globalization;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
@@ -32,6 +33,7 @@ namespace PriceTracking.Service.Services
             var fromDate = request.FromDate.ToUniversalTime().AddDays(1);
             var toDate = request.ToDate.ToUniversalTime().AddDays(1);
 
+            checkIds(idList);
             var products = await _productRespository.Where(product => product.ProductDate >= fromDate && product.ProductDate <= toDate).Where(x => idList.Contains(x.ProductId)).OrderBy(date=>date.ProductDate).ToListAsync();
             var productDto = _mapper.Map<List<ProductDto>>(products);
 
@@ -94,16 +96,17 @@ namespace PriceTracking.Service.Services
             var monthDate = FindMonth(fromDate, toDate);
 
             List<InflationDto> allResult = new List<InflationDto>();
+
+            checkIds(idList);
             foreach (var id in idList) 
             {
+                
                 var products = await _productRespository.GetSelectedValuesByProductId(Convert.ToInt32(id), fromDate, toDate);
                 var specificProducts = GetSpecificValues(products, monthDate);
-
 
                 var lastPrice = specificProducts.OrderBy(x => x.ProductDate).Select(x => x.ProductPrice).LastOrDefault();
                 var firstPrice = specificProducts.OrderBy(x => x.ProductDate).Select(x => x.ProductPrice).FirstOrDefault();
 
-                 
                 InflationDto deneme = new InflationDto();
                 deneme.ProductId = specificProducts.FirstOrDefault().ProductId;
                 deneme.ProductTitle = specificProducts.FirstOrDefault().ProductTitle;
@@ -116,7 +119,7 @@ namespace PriceTracking.Service.Services
                 deneme.Products = _mapper.Map<List<ProductDto>>(specificProducts);
 
                 allResult.Add(deneme);
-
+                
             }
 
 
@@ -148,6 +151,8 @@ namespace PriceTracking.Service.Services
             var weekDate = FindWeek(fromDate, toDate);
 
             List<InflationDto> allResult = new List<InflationDto>();
+
+            checkIds(idList);
             foreach (var id in idList)
             {
                 var products = await _productRespository.GetSelectedValuesByProductId(Convert.ToInt32(id), fromDate, toDate);
@@ -197,6 +202,7 @@ namespace PriceTracking.Service.Services
             var fromDate = request.FromDate.ToUniversalTime().AddDays(1);
             var toDate = request.ToDate.ToUniversalTime().AddDays(1);
             List<InflationDto> allResult = new List<InflationDto>();
+            checkIds(idList);
 
             foreach (var id in idList)
             {
@@ -245,7 +251,7 @@ namespace PriceTracking.Service.Services
 
             var fromDate = request.FromDate.ToUniversalTime().AddDays(1);
             var toDate = request.ToDate.ToUniversalTime().AddDays(1);
-
+            checkIds(idList);
             var product = await _productRespository.GetSelectedValuesByProductIds(idList, fromDate, toDate);
             var productDto = _mapper.Map<List<ProductDto>>(product);
 
@@ -290,6 +296,24 @@ namespace PriceTracking.Service.Services
             }
 
             return result;
+        }
+        public  void  checkIds(List<string> idList)
+        {
+            var commonIdList = new List<string>();
+            foreach (var id in idList)
+            {
+                var asdw =  _productRespository.AnyAsync(x => x.ProductId == id).Result;
+                if (asdw == true)
+                {
+                    commonIdList.Add(id);
+                }
+            }
+            if (commonIdList.Count()!= idList.Count()) 
+            {
+                string ids = "";
+                idList.Except(commonIdList).ToList().ForEach(x => ids += ", " + x);
+                throw new NotFoundException($"Product Id {ids} not found.");
+            }
         }
     }
 }

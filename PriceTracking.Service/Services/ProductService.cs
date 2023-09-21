@@ -7,7 +7,9 @@ using PriceTracking.Core.Models;
 using PriceTracking.Core.Repositories;
 using PriceTracking.Core.Services;
 using PriceTracking.Core.UnitOfWorks;
+using PriceTracking.Service.Exceptions;
 using System.Globalization;
+using System.Linq.Expressions;
 
 namespace PriceTracking.Service.Services
 {
@@ -71,8 +73,11 @@ namespace PriceTracking.Service.Services
         {
             var fromDate = request.FromDate.ToUniversalTime().AddDays(1);
             var toDate = request.ToDate.ToUniversalTime().AddDays(1);
+            
 
             var monthDate = FindMonth(fromDate, toDate);
+
+            checkId(request.ProductId.ToString());
             var products = await _productRespository.GetSelectedValuesByProductId(request.ProductId, fromDate, toDate);
             var specificProducts = GetSpecificValues(products, monthDate);
 
@@ -117,6 +122,7 @@ namespace PriceTracking.Service.Services
             var toDate = request.ToDate.ToUniversalTime().AddDays(1);
             
             var weekDate = FindWeek(fromDate, toDate);
+            checkId(request.ProductId.ToString());
             var products = await _productRespository.GetSelectedValuesByProductId(request.ProductId, fromDate, toDate);
             var specificProducts = GetSpecificValues(products, weekDate).ToList();
             specificProducts.OrderBy(x => x.ProductDate);
@@ -160,9 +166,9 @@ namespace PriceTracking.Service.Services
             var toDate = request.ToDate.ToUniversalTime().AddDays(1);
             var id = request.ProductId;
 
+            checkId(request.ProductId.ToString());
             var prices = await _productRespository.Where(x => x.ProductId == id.ToString()).Where(y => y.ProductDate >= fromDate && y.ProductDate <= toDate).OrderBy(x=>x.ProductDate).Select(p => p.ProductPrice).ToListAsync();
             var product = await _productRespository.GetSelectedValuesByProductId(id, fromDate, toDate);
-
             var lastPrice = prices.LastOrDefault();
             var firstPrice = prices.FirstOrDefault();
 
@@ -200,7 +206,7 @@ namespace PriceTracking.Service.Services
         {
             var fromDate = request.FromDate.ToUniversalTime().AddDays(1);
             var toDate = request.ToDate.ToUniversalTime().AddDays(1);
-
+            checkId(request.ProductId.ToString());
             var product = await _productRespository.GetSelectedValuesByProductId(request.ProductId, fromDate, toDate);
             var productDto = _mapper.Map<List<ProductDto>>(product);
 
@@ -244,6 +250,14 @@ namespace PriceTracking.Service.Services
             }
 
             return result;
+        }
+        public void checkId(string id)
+        {
+            var result = _productRespository.AnyAsync(x => x.ProductId == id).Result;
+            if (result == false)
+            {
+                throw new NotFoundException($"Product Id {id} not found.");
+            }
         }
     }
 }

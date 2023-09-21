@@ -2,6 +2,7 @@ using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PriceTracking.API.Filters;
+using PriceTracking.API.Middlewares;
 using PriceTracking.Core.Repositories;
 using PriceTracking.Core.Services;
 using PriceTracking.Core.UnitOfWorks;
@@ -58,6 +59,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCustomException();
 
 app.UseAuthorization();
 
