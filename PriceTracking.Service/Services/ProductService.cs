@@ -74,9 +74,7 @@ namespace PriceTracking.Service.Services
             var fromDate = request.FromDate.ToUniversalTime().AddDays(1);
             var toDate = request.ToDate.ToUniversalTime().AddDays(1);
             
-
             var monthDate = FindMonth(fromDate, toDate);
-
             checkId(request.ProductId.ToString());
             var products = await _productRespository.GetSelectedValuesByProductId(request.ProductId, fromDate, toDate);
             var specificProducts = GetSpecificValues(products, monthDate);

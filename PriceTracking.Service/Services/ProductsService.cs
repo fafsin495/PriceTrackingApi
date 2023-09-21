@@ -96,11 +96,9 @@ namespace PriceTracking.Service.Services
             var monthDate = FindMonth(fromDate, toDate);
 
             List<InflationDto> allResult = new List<InflationDto>();
-
             checkIds(idList);
             foreach (var id in idList) 
             {
-                
                 var products = await _productRespository.GetSelectedValuesByProductId(Convert.ToInt32(id), fromDate, toDate);
                 var specificProducts = GetSpecificValues(products, monthDate);
 
@@ -151,7 +149,6 @@ namespace PriceTracking.Service.Services
             var weekDate = FindWeek(fromDate, toDate);
 
             List<InflationDto> allResult = new List<InflationDto>();
-
             checkIds(idList);
             foreach (var id in idList)
             {
