@@ -26,5 +26,9 @@ namespace PriceTracking.Repository.Repositories
             return await _context.Products.Where(x => id.Contains(x.ProductId)).Where(x => x.ProductDate >= fromDate && x.ProductDate <= toDate).OrderBy(x => x.ProductDate).ToListAsync();
         }
 
+        public async Task<List<Product>> GetAll()
+        {
+            return await _context.Products.AsNoTracking().AsQueryable().OrderBy(x => x.ProductDate).ToListAsync();
+        }
     }
 }

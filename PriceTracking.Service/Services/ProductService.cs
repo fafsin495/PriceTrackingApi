@@ -10,6 +10,7 @@ using PriceTracking.Core.UnitOfWorks;
 using PriceTracking.Service.Exceptions;
 using System.Globalization;
 using System.Linq.Expressions;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace PriceTracking.Service.Services
 {
@@ -31,8 +32,8 @@ namespace PriceTracking.Service.Services
         /// <returns>Fiyat farkı</returns>
         public async Task<CustomResponseDto<List<InflationDto>>> GetTotalInflation()
         {
-            DateTime firstDate = new DateTime(2022, 8, 1).ToUniversalTime().AddDays(1);
-            DateTime lastDate = new DateTime(2023, 8, 1).ToUniversalTime().AddDays(1);
+            DateTime firstDate = new DateTime(2022, 8, 1).ToUniversalTime().AddHours(3);
+            DateTime lastDate = new DateTime(2023, 8, 1).ToUniversalTime().AddHours(3);
 
             var firstProducts = _productRespository.Where(x => x.ProductDate == firstDate);
             var lastProducts = _productRespository.Where(x => x.ProductDate == lastDate);
@@ -71,8 +72,8 @@ namespace PriceTracking.Service.Services
         /// <returns>Aylık olarak Fiyat farkı</returns>
         public async Task<CustomResponseDto<InflationDto>> GetMonthlyDifference(RequestByProductIdDto request)
         {
-            var fromDate = request.FromDate.ToUniversalTime().AddDays(1);
-            var toDate = request.ToDate.ToUniversalTime().AddDays(1);
+            var fromDate = request.FromDate.ToUniversalTime().AddHours(3);
+            var toDate =   request.ToDate.ToUniversalTime().AddHours(3);
             
             var monthDate = FindMonth(fromDate, toDate);
             checkId(request.ProductId.ToString());
@@ -116,9 +117,9 @@ namespace PriceTracking.Service.Services
         /// <returns>Haftalık olarak Fiyat farkı</returns>
         public async Task<CustomResponseDto<InflationDto>> GetWeeklyDifference (RequestByProductIdDto request)
         {
-            var fromDate = request.FromDate.ToUniversalTime().AddDays(1);
-            var toDate = request.ToDate.ToUniversalTime().AddDays(1);
-            
+            var fromDate = request.FromDate.ToUniversalTime().AddHours(3);
+            var toDate = request.ToDate.ToUniversalTime().AddHours(3);
+
             var weekDate = FindWeek(fromDate, toDate);
             checkId(request.ProductId.ToString());
             var products = await _productRespository.GetSelectedValuesByProductId(request.ProductId, fromDate, toDate);
@@ -160,8 +161,8 @@ namespace PriceTracking.Service.Services
         /// <returns>Fiyat farkı</returns>
         public async Task<CustomResponseDto<InflationDto>> GetInfluationDifference(RequestByProductIdDto request)
         {
-            var fromDate = request.FromDate.ToUniversalTime().AddDays(1);
-            var toDate = request.ToDate.ToUniversalTime().AddDays(1);
+            var fromDate = request.FromDate.ToUniversalTime().AddHours(3);
+            var toDate = request.ToDate.ToUniversalTime().AddHours(3);
             var id = request.ProductId;
 
             checkId(request.ProductId.ToString());
@@ -202,8 +203,8 @@ namespace PriceTracking.Service.Services
         /// <returns>Ürünler</returns>
         public async Task<CustomResponseDto<List<ProductDto>>> GetSelectedValues(RequestByProductIdDto request)
         {
-            var fromDate = request.FromDate.ToUniversalTime().AddDays(1);
-            var toDate = request.ToDate.ToUniversalTime().AddDays(1);
+            var fromDate = request.FromDate.ToUniversalTime().AddHours(3);
+            var toDate = request.ToDate.ToUniversalTime().AddHours(3);
             checkId(request.ProductId.ToString());
             var product = await _productRespository.GetSelectedValuesByProductId(request.ProductId, fromDate, toDate);
             var productDto = _mapper.Map<List<ProductDto>>(product);

@@ -30,8 +30,8 @@ namespace PriceTracking.Service.Services
             var idList = new List<string>();
             request.ProductIds.ForEach(x => { idList.Add(x.ToString()); });
 
-            var fromDate = request.FromDate.ToUniversalTime().AddDays(1);
-            var toDate = request.ToDate.ToUniversalTime().AddDays(1);
+            var fromDate = request.FromDate.ToUniversalTime().AddHours(3);
+            var toDate = request.ToDate.ToUniversalTime().AddHours(3);
 
             checkIds(idList);
             var products = await _productRespository.Where(product => product.ProductDate >= fromDate && product.ProductDate <= toDate).Where(x => idList.Contains(x.ProductId)).OrderBy(date=>date.ProductDate).ToListAsync();
@@ -47,8 +47,8 @@ namespace PriceTracking.Service.Services
         /// <returns>Fiyat farkı</returns>
         public async Task<CustomResponseDto<List<InflationDto>>> GetTotalInflation()
         {
-            DateTime firstDate = new DateTime(2022, 8, 1).ToUniversalTime().AddDays(1);
-            DateTime lastDate = new DateTime(2023, 8, 1).ToUniversalTime().AddDays(1);
+            DateTime firstDate = new DateTime(2022, 8, 1).ToUniversalTime().AddHours(3);
+            DateTime lastDate = new DateTime(2023, 8, 1).ToUniversalTime().AddHours(3);
 
             var firstProducts = _productRespository.Where(x => x.ProductDate == firstDate);
             var lastProducts = _productRespository.Where(x => x.ProductDate == lastDate);
@@ -90,8 +90,8 @@ namespace PriceTracking.Service.Services
             var idList = new List<string>();
             request.ProductIds.ForEach(x => { idList.Add(x.ToString()); });
 
-            var fromDate = request.FromDate.ToUniversalTime().AddDays(1);
-            var toDate = request.ToDate.ToUniversalTime().AddDays(1);
+            var fromDate = request.FromDate.ToUniversalTime().AddHours(3);
+            var toDate = request.ToDate.ToUniversalTime().AddHours(3);
 
             var monthDate = FindMonth(fromDate, toDate);
 
@@ -144,8 +144,8 @@ namespace PriceTracking.Service.Services
             var idList = new List<string>();
             request.ProductIds.ForEach(x => { idList.Add(x.ToString()); });
 
-            var fromDate = request.FromDate.ToUniversalTime().AddDays(1);
-            var toDate = request.ToDate.ToUniversalTime().AddDays(1);
+            var fromDate = request.FromDate.ToUniversalTime().AddHours(3);
+            var toDate = request.ToDate.ToUniversalTime().AddHours(3);
             var weekDate = FindWeek(fromDate, toDate);
 
             List<InflationDto> allResult = new List<InflationDto>();
@@ -196,8 +196,8 @@ namespace PriceTracking.Service.Services
             var idList = new List<string>();
             request.ProductIds.ForEach(x => { idList.Add(x.ToString()); });
 
-            var fromDate = request.FromDate.ToUniversalTime().AddDays(1);
-            var toDate = request.ToDate.ToUniversalTime().AddDays(1);
+            var fromDate = request.FromDate.ToUniversalTime().AddHours(3);
+            var toDate = request.ToDate.ToUniversalTime().AddHours(3);
             List<InflationDto> allResult = new List<InflationDto>();
             checkIds(idList);
 
@@ -246,8 +246,8 @@ namespace PriceTracking.Service.Services
             var idList = new List<string>();
             request.ProductIds.ForEach(x => { idList.Add(x.ToString()); });
 
-            var fromDate = request.FromDate.ToUniversalTime().AddDays(1);
-            var toDate = request.ToDate.ToUniversalTime().AddDays(1);
+            var fromDate = request.FromDate.ToUniversalTime().AddHours(3);
+            var toDate = request.ToDate.ToUniversalTime().AddHours(3);
             checkIds(idList);
             var product = await _productRespository.GetSelectedValuesByProductIds(idList, fromDate, toDate);
             var productDto = _mapper.Map<List<ProductDto>>(product);
